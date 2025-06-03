@@ -1,6 +1,7 @@
 import streamlit as st
-
-# 初始化狀態
+grid_size = 5
+if "grid_data" not in st.session_state:
+    st.session_state.grid_data = [[{"unit": None} for _ in range(grid_size)] for _ in range(grid_size)]
 if "resources" not in st.session_state:
     st.session_state.resources = {"晶礦": 500, "油礦": 300}
 if "buildings" not in st.session_state:
@@ -29,7 +30,32 @@ unit_costs = {
     "幽靈戰機": {"晶礦": 200, "油礦": 100, "訓練所": "飛機場"},
     "大和": {"晶礦": 500, "油礦": 300, "訓練所": "飛機場"}
 }
+st.write("## 戰場網格")
 
+# 模擬兵種圖片（可換成實際圖片網址或檔案）
+unit_images = {
+    "marine": "https://static.wikia.nocookie.net/starcraft/images/d/d9/Marine_SC2_CncArt1.jpg",
+    "ghost": "https://static.wikia.nocookie.net/starcraft/images/e/e1/Ghost_SC2_Rend1.jpg",
+    "yamato": "https://static.wikia.nocookie.net/starcraft/images/3/36/Battlecruiser_SC2_Rend1.jpg",
+    None: "https://via.placeholder.com/80"
+}
+
+# 繪製網格
+for row in range(grid_size):
+    cols = st.columns(grid_size)
+    for col in range(grid_size):
+        cell = st.session_state.grid_data[row][col]
+        with cols[col]:
+            st.image(unit_images[cell["unit"]], width=80)
+            if st.button(f"{row},{col} 選擇", key=f"btn_{row}_{col}"):
+                st.session_state.selected = (row, col)
+
+# 顯示選中的格子
+if "selected" in st.session_state:
+    row, col = st.session_state.selected
+    st.markdown(f"### 選中格子：({row}, {col})")
+    unit = st.selectbox("選擇兵種", ["marine", "ghost", "yamato", None])
+    st.session_state.grid_data[row][col]["unit"] = unit
 st.subheader("訓練單位")
 for unit in unit_costs:
     cost = unit_costs[unit]
